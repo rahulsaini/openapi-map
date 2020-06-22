@@ -6,7 +6,7 @@ const handlebars = require('gulp-handlebars');
 const wrap = require('gulp-wrap');
 const declare = require('gulp-declare');
 const del = require('del');
-const webserver = require('gulp-webserver');
+const webserver = require('gulp-webserver');  // webserver to serve pages
 
 // https://github.com/gulpjs/gulp/blob/master/docs/recipes/running-task-steps-per-folder.md
 const fs = require('fs');
@@ -31,8 +31,15 @@ function getFolders(dir) {
     });
 }
 
+// Default task: test then build
+gulp.task('default', async function(callback){
+    console.log("Gulp DEFAULT Task .... ....... ......... ..........");
+    gulp.series('test', 'build')(callback);
+});
+
 // Concat data/<each version>/**/*.yaml in <each version>.json
 gulp.task('build-data-files', function() {
+    console.log("Gulp task build-data-files ...");
   const dataPath = 'data';
   const folders = getFolders(dataPath);
   var tasks = folders.map(function(folder) {
@@ -47,28 +54,33 @@ gulp.task('build-data-files', function() {
 
 // Copy versions.json file to dist
 gulp.task('build-version-file', function() {
+    console.log("Copied versions.json to dist");
   return gulp.src('data/*.json')
     .pipe(gulp.dest('dist'));
+
 });
 
 // Build versions.json and <each version>.json files
 gulp.task('build-data', function(callback) {
-  gulpSequence('build-data-files', 'build-version-file')(callback);
+    console.log("build data ...");
+  gulp.series('build-data-files', 'build-version-file')(callback);
 });
 
 // Generate js code for the tooltip panel's templating and copy to dist
-gulp.task('templates', () => {
+gulp.task('templates', done => {
+    console.log("Gulp task templates ...");
   gulp.src('web/templates/*.hbs')
     .pipe(handlebars({
       handlebars: require('handlebars')
     }))
     .pipe(wrap('Handlebars.template(<%= contents %>)'))
     .pipe(declare({
-      namespace: 'OpenAPISpecificationVisualDocumentation',
+      namespace: 'JavaAPIFeaturesVisualDocumentation',
       noRedeclare: true // Avoid duplicate declarations
     }))
     .pipe(concat('templates.js'))
     .pipe(gulp.dest('dist/js'));
+  done();
 });
 
 // Copy html, css dans js files to dist
@@ -78,20 +90,24 @@ gulp.task('static', () => {
 });
 
 // Copy static and templated files to dist
-gulp.task('build-web', ['static', 'templates']);
+gulp.task('build-web', async function(){
+    gulp.series('static', 'templates')
+});
 
 // Copy web and data files to dist
-gulp.task('build', function(callback) {
-  gulpSequence('clean', 'build-web', 'build-data')(callback);
+gulp.task('build', async function(callback) {
+  gulp.series('clean', 'build-web', 'build-data')(callback);
 });
 
 // Deletes dist
 gulp.task('clean', del.bind(null, ['dist']));
 
 // Watch for modifications on web and data files, relaunch tests and build if files are modified
-gulp.task('watch', ['default'], function() {
-  return gulp.watch(['data/**/*', 'web/**/*'], ['default']);
-});
+gulp.task('watch', gulp.series('default', async function() {
+   gulp.watch(('data/**/*'));
+   gulp.watch(('web/**/*'));
+   gulp.watch(('default'));
+}));
 
 // Launch web server on dist directory with live-reload
 gulp.task('webserver', function() {
@@ -99,15 +115,21 @@ gulp.task('webserver', function() {
     .pipe(webserver({
       port: 8080,
       livereload: true,
-      directoryListing: false,
+        directoryListing: {
+            enable:true,
+            path: 'dist'
+        },
       open: true,
-      fallback: 'index.html'
+      fallback: 'index.html',
+      baseDir: '.',
+      index: 'index.html'
     }));
 });
 
 // Launch dev mode
-gulp.task('serve', function(callback) {
-  gulpSequence('watch', 'webserver')(callback);
+gulp.task('serve', async function(callback) {
+    console.log("Launch DEV Mode and Serve ...");
+  gulp.series('watch', 'webserver')(callback);
 });
 
 // Test with mocha (prerequisites: npm install -g mocha)
@@ -115,9 +137,4 @@ gulp.task('test', function() {
   return gulp.src(['test/*.js'], { read: false })
       .pipe(mocha())
       .on('error', gutil.log);
-});
-
-// Default task: test then build
-gulp.task('default', function(callback){
-  gulpSequence('test', 'build')(callback);
 });

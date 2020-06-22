@@ -1,5 +1,5 @@
 'use strict';
-var template = OpenAPISpecificationVisualDocumentation.tooltip;
+var template = JavaAPIFeaturesVisualDocumentation.tooltip;
 
 function getNodeTextClass(node) {
     var result;

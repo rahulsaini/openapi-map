@@ -1,11 +1,12 @@
-# OpenAPI Map ![](https://travis-ci.org/arno-di-loreto/openapi-map.svg?branch=master)
+# Java API Features Map ![](https://travis-ci.org/arno-di-loreto/openapi-map.svg?branch=master)
 
-The OpenAPI Map (fka. OpenAPI Specification Visual Document) aims to help you find your way in the [OpenAPI Specification](https://github.com/OAI/OpenAPI-Specification) (fka. Swagger Specification) documentation. Note that it is not made to render an OpenAPI document.
+The Java API Language Features Map (**Illustrating Java API Features Java 8 and onwards till latest Java version  - Java 14**)
 
-It has been created by [Arnaud Lauret, the API Handyman](https://apihandyman.io).
+It is an Interactive Tree presentation of key features of the Java Language - 8 till 14 with detailed examples.
+
+Interactive Tree Map developed by [Rahul Saini](https://sainirahul.wordpress.com).
 
 ## How to use it?
-You can see it on [openapi-map.apihandyman.io](http://openapi-map.apihandyman.io/)
 
 - Zoom in: Mouse scroll up
 - Zoom out: Mouse scroll down
